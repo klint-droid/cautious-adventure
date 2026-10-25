@@ -67,7 +67,21 @@ export class DialogueUI {
       if (this.isTyping) {
         this.finishTypewriter();
       } else if (!this.hasAvailableOptions()) {
-        dialogueManager.endDialogue();
+        dialogueManager.advance();
+      }
+    });
+
+    // Keyboard controls for advancing dialogue (Space, Enter, E)
+    window.addEventListener("keydown", (e) => {
+      if (!dialogueManager.getIsActive()) return;
+      if (e.code === "Space" || e.code === "Enter" || e.code === "KeyE") {
+        if (this.isTyping) {
+          e.preventDefault();
+          this.finishTypewriter();
+        } else if (!this.hasAvailableOptions()) {
+          e.preventDefault();
+          dialogueManager.advance();
+        }
       }
     });
 
@@ -91,6 +105,13 @@ export class DialogueUI {
   public showNode(node: DialogueNode, text: string) {
     this.container.classList.remove("hidden");
     this.speakerEl.textContent = node.speaker;
+
+    // Apply Cyril-specific speaking styling when Cyril is the speaker
+    if (node.speaker === "Cyril") {
+      this.dialogueBar.classList.add("cyril-speaking");
+    } else {
+      this.dialogueBar.classList.remove("cyril-speaking");
+    }
 
     // Subtle side alignment indicator for speaker
     const iconEl = document.getElementById("dialogue-speaker-icon");
@@ -167,7 +188,7 @@ export class DialogueUI {
       this.optionsContainer.classList.add("hidden");
       this.continuePrompt.classList.remove("hidden");
       this.continuePrompt.onclick = () => {
-        dialogueManager.endDialogue();
+        dialogueManager.advance();
       };
       return;
     }

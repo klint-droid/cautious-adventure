@@ -25,6 +25,10 @@ import { DialogueUI } from "../ui/DialogueUI";
 import { PauseMenu } from "../ui/PauseMenu";
 import { notificationSystem } from "../ui/NotificationSystem";
 
+// Cutscenes
+import { RomanticBillboard } from "../cutscenes/RomanticBillboard";
+import { ConfessionSceneController } from "../cutscenes/ConfessionSceneController";
+
 export class Game {
   private container: HTMLElement;
   private scene: THREE.Scene;
@@ -45,6 +49,10 @@ export class Game {
   private hud: HUD;
   private dialogueUI: DialogueUI;
   private pauseMenu: PauseMenu;
+
+  // Cutscenes
+  private romanticBillboard: RomanticBillboard;
+  private confessionSceneController: ConfessionSceneController;
 
   private isRunning = false;
   private audioInitialized = false;
@@ -98,6 +106,18 @@ export class Game {
 
     this.player = new PlayerController(playerRig);
     this.npc = new NPCController(npcRig);
+
+    // 8b. Romantic Billboard overlooking Mirror Lake
+    this.romanticBillboard = new RomanticBillboard();
+    this.scene.add(this.romanticBillboard.group);
+
+    // 8c. Confession Scene Controller State Machine
+    this.confessionSceneController = new ConfessionSceneController(
+      this.player,
+      this.npc,
+      this.cameraController,
+      this.romanticBillboard
+    );
 
     // Glowing Golden Diamond Waypoint above Klint's head
     const waypointGeom = new THREE.OctahedronGeometry(0.24, 0);
@@ -215,7 +235,7 @@ export class Game {
 
     // Key 'E' interaction
     this.input.onInteract(() => {
-      if (!dialogueManager.getIsActive() && !this.pauseMenu.getIsVisible()) {
+      if (!dialogueManager.getIsActive() && !this.pauseMenu.getIsVisible() && !this.confessionSceneController.isCutsceneActive()) {
         interactionSystem.triggerCurrent();
       }
     });
@@ -224,14 +244,16 @@ export class Game {
     this.input.onPause(() => {
       if (dialogueManager.getIsActive()) {
         dialogueManager.endDialogue();
-      } else {
+      } else if (!this.confessionSceneController.isCutsceneActive()) {
         this.pauseMenu.toggle();
       }
     });
 
     // HUD button callbacks
     this.hud.onPauseClick(() => {
-      this.pauseMenu.toggle();
+      if (!this.confessionSceneController.isCutsceneActive()) {
+        this.pauseMenu.toggle();
+      }
     });
 
     // Pause menu save/load handlers
@@ -268,8 +290,10 @@ export class Game {
       },
       onDialogueEnd: () => {
         this.dialogueUI.hide();
-        this.player.setMovementLocked(false);
-        this.cameraController.setCinematicMode(false);
+        if (!this.confessionSceneController.isCutsceneActive()) {
+          this.player.setMovementLocked(false);
+          this.cameraController.setCinematicMode(false);
+        }
       },
       onAffectionGained: (delta, stageChanged, newStage) => {
         notificationSystem.showAffectionGain(delta);
@@ -288,17 +312,23 @@ export class Game {
   }
 
   private startConversationWithKlint() {
-    this.player.setMovementLocked(true);
-    // Orient both characters toward each other
-    this.player.lookAt(this.npc.position);
-    this.npc.lookAt(this.player.position);
-
-    // Transition camera into cinematic side-by-side shot
-    this.cameraController.setCinematicMode(true, this.player.position, this.npc.position);
     this.klintWaypoint.visible = false;
 
-    // Launch dialogue flow
-    dialogueManager.startDialogue("intro_root");
+    // If confession scene hasn't been played yet, start Klint's Courtship Confession Scene
+    if (!this.confessionSceneController.hasCompletedScene()) {
+      this.confessionSceneController.startScene();
+    } else {
+      this.player.setMovementLocked(true);
+      // Orient both characters toward each other
+      this.player.lookAt(this.npc.position);
+      this.npc.lookAt(this.player.position);
+
+      // Transition camera into cinematic side-by-side shot
+      this.cameraController.setCinematicMode(true, this.player.position, this.npc.position);
+
+      // Launch dialogue flow
+      dialogueManager.startDialogue("hi_quick");
+    }
   }
 
   private restoreSavedGame() {
@@ -332,6 +362,7 @@ export class Game {
 
     const delta = Math.min(this.clock.getDelta(), 0.1);
     const isDialogueActive = dialogueManager.getIsActive();
+    const isCutscene = this.confessionSceneController.isCutsceneActive();
 
     // 1. Weather & Falling Sakura Petals
     this.weatherSystem.update(delta);
@@ -339,31 +370,38 @@ export class Game {
     // 2. Lake Water Ripples
     this.parkBuilder.getLakeBuilder().updateWater(delta);
 
-    // 3. Player Movement & Kinematics
-    this.player.update(delta, this.input, this.cameraController);
+    // 3. Player Movement & Kinematics (locked during cutscene)
+    if (!isCutscene) {
+      this.player.update(delta, this.input, this.cameraController);
+    }
 
-    // 4. Male NPC Klint State Machine & Awareness
-    this.npc.update(delta, this.player.position, isDialogueActive);
+    // 4. Male NPC Klint State Machine & Awareness (controlled by cutscene during scene)
+    if (!isCutscene) {
+      this.npc.update(delta, this.player.position, isDialogueActive);
+    }
+
+    // 5. Update Confession Scene Controller State Machine & Billboard
+    this.confessionSceneController.update(delta);
 
     // Waypoint animation above Klint
     this.waypointTime += delta;
-    if (this.klintWaypoint.visible) {
+    if (this.klintWaypoint.visible && !isCutscene) {
       this.klintWaypoint.rotation.y += delta * 2.2;
       this.klintWaypoint.position.y = 2.45 + Math.sin(this.waypointTime * 3) * 0.12;
     }
 
     // Proactive flow: When Cyril walks up to Klint for the first time,
-    // Klint automatically initiates the conversation and asks if she is open for courtship!
-    if (!this.hasMetKlint && !isDialogueActive && !relationshipSystem.isTopicDiscussed("intro_completed")) {
+    // Klint automatically initiates the courtship conversation!
+    if (!this.hasMetKlint && !isDialogueActive && !this.confessionSceneController.hasCompletedScene() && !isCutscene) {
       const distToKlint = this.player.position.distanceTo(this.npc.position);
-      if (distToKlint <= 2.8) {
+      if (distToKlint <= 3.2) {
         this.hasMetKlint = true;
         this.startConversationWithKlint();
       }
     }
 
-    // 5. Interaction Proximity Detection
-    if (!isDialogueActive) {
+    // 6. Interaction Proximity Detection
+    if (!isDialogueActive && !isCutscene) {
       const target = interactionSystem.update(this.player.position);
       if (target) {
         this.hud.setInteractionPrompt(true, target.promptText);

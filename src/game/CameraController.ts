@@ -48,6 +48,21 @@ export class CameraController {
     }
   }
 
+  public setCustomCinematic(camPos: THREE.Vector3, lookAtPos: THREE.Vector3, immediate: boolean = false) {
+    this.isCinematic = true;
+    this.cinematicCamPos.copy(camPos);
+    this.cinematicLookAt.copy(lookAtPos);
+    if (immediate) {
+      this.camera.position.copy(camPos);
+      this.currentLookAt.copy(lookAtPos);
+      this.camera.lookAt(this.currentLookAt);
+    }
+  }
+
+  public getIsCinematic(): boolean {
+    return this.isCinematic;
+  }
+
   public update(
     delta: number,
     playerPos: THREE.Vector3,

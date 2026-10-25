@@ -283,6 +283,33 @@ kbd {
   transform: translateY(4px);
 }
 
+/* Cyril speaking mode: bar slides smoothly to HER side (LEFT) */
+.klint-dialogue-bar.cyril-speaking {
+  right: auto;
+  left: 4%;
+  border-color: rgba(255, 133, 162, 0.65);
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.55), inset 0 0 20px rgba(255, 133, 162, 0.08);
+}
+
+.klint-dialogue-bar.cyril-speaking::before,
+.klint-dialogue-bar.cyril-speaking::after {
+  border-color: rgba(255, 133, 162, 0.85);
+}
+
+.klint-dialogue-bar.cyril-speaking .klint-speaker-badge {
+  background: linear-gradient(90deg, rgba(38, 20, 34, 0.95), rgba(28, 16, 26, 0.9));
+  border-color: rgba(255, 133, 162, 0.8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 133, 162, 0.3);
+}
+
+.klint-dialogue-bar.cyril-speaking .klint-diamond {
+  color: var(--primary-pink);
+}
+
+.klint-dialogue-bar.cyril-speaking .klint-continue {
+  color: var(--primary-pink);
+}
+
 /* Klint Gold Corner Accents */
 .klint-dialogue-bar::before,
 .klint-dialogue-bar::after {
@@ -1057,3 +1084,94 @@ input[type="range"] {
     box-shadow: 0 6px 30px rgba(0, 0, 0, 0.5), 0 0 26px rgba(255, 133, 162, 0.7);
   }
 }
+
+/* ===================================================================
+   CONFESSION CUTSCENE OVERLAYS & TITLE CARD
+   =================================================================== */
+#confession-fade-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: #0b090f;
+  z-index: 90;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.0s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+#confession-fade-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#confession-title-card {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1), transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+  transform: scale(0.96);
+  text-align: center;
+  padding: 24px;
+}
+
+#confession-title-card.active {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.confession-title-emblem {
+  font-size: 34px;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 14px rgba(255, 133, 162, 0.8));
+  animation: pulseEmblem 3s infinite ease-in-out;
+}
+
+.confession-title-main {
+  font-size: clamp(28px, 4.4vw, 50px);
+  font-weight: 800;
+  letter-spacing: 5px;
+  color: #fff5f8;
+  text-shadow: 0 0 25px rgba(255, 133, 162, 0.6), 0 4px 16px rgba(0, 0, 0, 0.9);
+  margin-bottom: 8px;
+  font-family: var(--font-main);
+  text-transform: uppercase;
+}
+
+.confession-title-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 240px;
+  margin: 14px auto;
+  color: var(--accent-gold);
+  font-size: 14px;
+}
+
+.confession-title-divider::before,
+.confession-title-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 209, 102, 0.8), transparent);
+}
+
+.confession-title-sub {
+  font-size: clamp(14px, 1.8vw, 18px);
+  color: #ffd1dc;
+  letter-spacing: 3px;
+  font-weight: 500;
+  font-style: italic;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+@keyframes pulseEmblem {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+

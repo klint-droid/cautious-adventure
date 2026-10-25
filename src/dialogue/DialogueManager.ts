@@ -102,6 +102,27 @@ export class DialogueManager {
     }
   }
 
+  public advance() {
+    if (!this.currentNode) return;
+
+    // If node has branching options, do not auto-advance
+    if (this.currentNode.options && this.currentNode.options.length > 0) {
+      return;
+    }
+
+    soundManager.playUIClick();
+
+    if (this.currentNode.onComplete) {
+      this.currentNode.onComplete();
+    }
+
+    if (this.currentNode.nextNodeId && this.currentNode.nextNodeId !== "end") {
+      this.goToNode(this.currentNode.nextNodeId);
+    } else {
+      this.endDialogue();
+    }
+  }
+
   public selectOption(index: number) {
     if (!this.currentNode || !this.currentNode.options) {
       this.endDialogue();

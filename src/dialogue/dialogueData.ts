@@ -34,9 +34,91 @@ export interface DialogueNode {
   onEnter?: () => void;
   triggerActivityId?: string;
   isEnd?: boolean;
+  nextNodeId?: string;
+  onComplete?: () => void;
 }
 
 export const DIALOGUE_NODES: Record<string, DialogueNode> = {
+  // ================================================================
+  // STAGE 1: INVITATION & SHORT CONVERSATION
+  // ================================================================
+  confession_invite_1: {
+    id: "confession_invite_1",
+    speaker: "Klint",
+    emotion: "smiling",
+    text: "Hey, Cyril! Do you have a moment?",
+    nextNodeId: "confession_invite_2",
+  },
+  confession_invite_2: {
+    id: "confession_invite_2",
+    speaker: "Cyril",
+    emotion: "smiling",
+    text: "Hey, Klint! Sure, what's up?",
+    nextNodeId: "confession_invite_3",
+  },
+  confession_invite_3: {
+    id: "confession_invite_3",
+    speaker: "Klint",
+    emotion: "thinking",
+    text: "I was wondering if you'd like to take a walk with me. There's something I'd like to show you.",
+    nextNodeId: "confession_invite_4",
+  },
+  confession_invite_4: {
+    id: "confession_invite_4",
+    speaker: "Cyril",
+    emotion: "surprised",
+    text: "A walk? Sure! Where are we going?",
+    nextNodeId: "confession_invite_5",
+  },
+  confession_invite_5: {
+    id: "confession_invite_5",
+    speaker: "Klint",
+    emotion: "blushing",
+    text: "It's a surprise. You'll see when we get there.",
+    nextNodeId: "confession_invite_6",
+  },
+  confession_invite_6: {
+    id: "confession_invite_6",
+    speaker: "Cyril",
+    emotion: "happy",
+    text: "Okay, now I'm curious! Let's go.",
+    nextNodeId: "end",
+    isEnd: true,
+  },
+
+  // ================================================================
+  // STAGE 4: KLINT'S COURTSHIP CONFESSION SPEECH
+  // ================================================================
+  confession_speech_1: {
+    id: "confession_speech_1",
+    speaker: "Klint",
+    emotion: "thinking",
+    text: "Cyril, I know this might be unexpected, but I want you to know that my intentions are sincere.",
+    nextNodeId: "confession_speech_2",
+  },
+  confession_speech_2: {
+    id: "confession_speech_2",
+    speaker: "Klint",
+    emotion: "blushing",
+    text: "I like you, and I'd love the opportunity to court you, get to know you better, and show you how much I genuinely care about you.",
+    nextNodeId: "confession_speech_3",
+  },
+  confession_speech_3: {
+    id: "confession_speech_3",
+    speaker: "Klint",
+    emotion: "blushing",
+    text: "I'm not asking you to promise me anything or to feel the same way right away. I just want to be honest about my feelings and ask if you'd be willing to give me a chance.",
+    nextNodeId: "confession_speech_4",
+  },
+  confession_speech_4: {
+    id: "confession_speech_4",
+    speaker: "Klint",
+    emotion: "smiling",
+    text: "Whatever your answer may be, I'll respect it. Thank you for taking the time to listen to me, Cyril.",
+    nextNodeId: "end",
+    isEnd: true,
+  },
+
   // ================================================================
   // PREAMBLE: THE CONFESSION
   // ================================================================
