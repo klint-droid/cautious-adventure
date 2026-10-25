@@ -36,6 +36,8 @@ export interface AnimeCharacterRig {
   blushMeshes: THREE.Mesh[];
   eyeMeshes: THREE.Mesh[];
   vrm?: VRM;
+  gltfMixer?: THREE.AnimationMixer;
+  gltfActions?: Record<string, THREE.AnimationAction>;
 }
 
 // Generate a 4-tone stepped gradient map for Three.js MeshToonMaterial (Anime Cel-Shading)
@@ -685,5 +687,98 @@ export class AnimeModelFactory {
       console.info(`VRM asset not present at ${url}; using stylized anime procedural model.`);
     }
     return null;
+  }
+
+  /**
+   * Loads a rigged and animated character from a GLB file (e.g. Cyril.glb or Klint.glb).
+   * Automatically extracts meshes, enables shadows, sets up AnimationMixer,
+   * and maps bone references into the standard AnimeCharacterRig interface.
+   */
+  public async loadGLTFCharacter(url: string, _characterType?: "female" | "male"): Promise<AnimeCharacterRig | null> {
+    try {
+      const loader = new GLTFLoader();
+      const gltf = await loader.loadAsync(url);
+      const root = new THREE.Group();
+      root.name = `CharacterRoot_${url}`;
+
+      const model = gltf.scene;
+      root.add(model);
+
+      const blushMeshes: THREE.Mesh[] = [];
+      const eyeMeshes: THREE.Mesh[] = [];
+
+      model.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+
+          const nameLower = child.name.toLowerCase();
+          if (nameLower.includes("blush")) {
+            blushMeshes.push(child as THREE.Mesh);
+          }
+          if (nameLower.includes("eyewhite") || nameLower.includes("iris") || nameLower.includes("pupil")) {
+            eyeMeshes.push(child as THREE.Mesh);
+          }
+        }
+      });
+
+      // Find bones in the glTF armature
+      const boneMap: Record<string, THREE.Object3D> = {};
+      model.traverse((child) => {
+        if ((child as THREE.Bone).isBone || child.type === "Bone") {
+          boneMap[child.name] = child;
+        }
+      });
+
+      const findBone = (names: string[]): THREE.Group => {
+        for (const n of names) {
+          if (boneMap[n]) return boneMap[n] as THREE.Group;
+        }
+        return new THREE.Group();
+      };
+
+      const bones = {
+        hips: findBone(["pelvis", "root", "Hips"]),
+        spine: findBone(["spine", "Spine"]),
+        chest: findBone(["chest", "Chest"]),
+        neck: findBone(["neck", "Neck"]),
+        head: findBone(["head", "Head"]),
+        leftUpperArm: findBone(["upper_arm.L", "upper_arm_L", "LeftUpperArm"]),
+        leftForearm: findBone(["forearm.L", "forearm_L", "LeftLowerArm"]),
+        leftHand: findBone(["hand.L", "hand_L", "LeftHand"]),
+        rightUpperArm: findBone(["upper_arm.R", "upper_arm_R", "RightUpperArm"]),
+        rightForearm: findBone(["forearm.R", "forearm_R", "RightLowerArm"]),
+        rightHand: findBone(["hand.R", "hand_R", "RightHand"]),
+        leftUpperLeg: findBone(["upper_leg.L", "upper_leg_L", "LeftUpperLeg"]),
+        leftLowerLeg: findBone(["lower_leg.L", "lower_leg_L", "LeftLowerLeg"]),
+        leftFoot: findBone(["foot.L", "foot_L", "LeftFoot"]),
+        rightUpperLeg: findBone(["upper_leg.R", "upper_leg_R", "RightUpperLeg"]),
+        rightLowerLeg: findBone(["lower_leg.R", "lower_leg_R", "RightLowerLeg"]),
+        rightFoot: findBone(["foot.R", "foot_R", "RightFoot"]),
+      };
+
+      const gltfMixer = new THREE.AnimationMixer(model);
+      const gltfActions: Record<string, THREE.AnimationAction> = {};
+      for (const clip of gltf.animations) {
+        gltfActions[clip.name] = gltfMixer.clipAction(clip);
+      }
+
+      if (gltfActions["Idle"]) {
+        gltfActions["Idle"].play();
+      }
+
+      return {
+        root,
+        meshGroup: model,
+        bones,
+        blushMeshes,
+        eyeMeshes,
+        gltfMixer,
+        gltfActions,
+      };
+    } catch (e) {
+      console.warn(`Failed to load GLTF character from ${url}:`, e);
+      return null;
+    }
   }
 }

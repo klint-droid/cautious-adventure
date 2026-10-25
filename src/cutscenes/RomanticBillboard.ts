@@ -312,66 +312,81 @@ export class RomanticBillboard {
 
     // 5. Top Ribbon / Heading Flourish
     ctx.save();
-    ctx.fillStyle = "#e0a96d";
-    ctx.font = "bold 32px 'Quicksand', -apple-system, sans-serif";
+    ctx.fillStyle = "#c98a58";
+    ctx.font = "bold 30px 'Quicksand', -apple-system, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("🌸  ✦  A  P R O M I S E  U N D E R  T H E  S A K U R A  ✦  🌸", 1024, 210);
+    ctx.fillText("🌸  ✦  A  P R O M I S E  U N D E R  T H E  S A K U R A  ✦  🌸", 1024, 160);
     ctx.restore();
 
-    // 6. EXACT PRIMARY TEXT: "CYRIL, CAN I COURT YOU?"
+    // 6. OPTION 4C DIRECT CONFESSION TEXT
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
     // Text Shadow / Anime Glow
     ctx.shadowColor = "rgba(255, 105, 140, 0.55)";
-    ctx.shadowBlur = 24;
+    ctx.shadowBlur = 22;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 4;
 
-    // Font setup: Bold, crisp, romantic anime typography
+    // Line 1: Lead-in
+    ctx.font = "800 52px 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillStyle = "#8a2846";
+    ctx.fillText("CYRIL, TO BE COMPLETELY HONEST...", 1024, 260);
+
+    // Line 2: Bold Core Confession - "I LIKE YOU,"
     ctx.font = "900 86px 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-
-    // Outline stroke for readability
     ctx.strokeStyle = "#ffd54f"; // Warm gold rim
-    ctx.lineWidth = 8;
-    ctx.strokeText("CYRIL, ARE YOU OPEN FOR COURTS?", 1024, 430);
-
-    // Main Fill: Deep romantic wine/plum
+    ctx.lineWidth = 7;
+    ctx.strokeText("I LIKE YOU,", 1024, 385);
     ctx.fillStyle = "#3b1120";
-    ctx.fillText("CYRIL, ARE YOU OPEN FOR COURTS?", 1024, 430);
+    ctx.fillText("I LIKE YOU,", 1024, 385);
+
+    // Line 3: "AND MY FEELINGS FOR YOU ARE GENUINE AND REAL."
+    ctx.font = "900 64px 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.strokeStyle = "#ffd54f";
+    ctx.lineWidth = 6;
+    ctx.strokeText("AND MY FEELINGS FOR YOU ARE GENUINE AND REAL.", 1024, 480);
+    ctx.fillStyle = "#3b1120";
+    ctx.fillText("AND MY FEELINGS FOR YOU ARE GENUINE AND REAL.", 1024, 480);
+
+    // Line 4: Sincere Courtship Subtitle
+    ctx.shadowBlur = 12;
+    ctx.font = "italic 600 38px 'Quicksand', -apple-system, sans-serif";
+    ctx.fillStyle = "#5c1b2f";
+    ctx.fillText("“I’m not asking for promises right away, only the chance to court you and show you my sincerity.”", 1024, 595);
     ctx.restore();
 
     // 7. Romantic Decorative Floral Divider
     ctx.save();
     // Left divider line
-    const leftGrad = ctx.createLinearGradient(480, 570, 930, 570);
+    const leftGrad = ctx.createLinearGradient(460, 685, 930, 685);
     leftGrad.addColorStop(0, "rgba(212, 175, 55, 0)");
     leftGrad.addColorStop(1, "rgba(212, 175, 55, 0.9)");
     ctx.strokeStyle = leftGrad;
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.moveTo(480, 570);
-    ctx.lineTo(930, 570);
+    ctx.moveTo(460, 685);
+    ctx.lineTo(930, 685);
     ctx.stroke();
 
     // Center Flower
-    this.drawSakuraFlower(ctx, 1024, 570, 24);
+    this.drawSakuraFlower(ctx, 1024, 685, 24);
 
     // Right divider line
-    const rightGrad = ctx.createLinearGradient(1118, 570, 1568, 570);
+    const rightGrad = ctx.createLinearGradient(1118, 685, 1588, 685);
     rightGrad.addColorStop(0, "rgba(212, 175, 55, 0.9)");
     rightGrad.addColorStop(1, "rgba(212, 175, 55, 0)");
     ctx.strokeStyle = rightGrad;
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.moveTo(1118, 570);
-    ctx.lineTo(1568, 570);
+    ctx.moveTo(1118, 685);
+    ctx.lineTo(1588, 685);
     ctx.stroke();
     ctx.restore();
 
-    // 8. EXACT SIGNATURE: "Sincerely, Klint."
+    // 8. EXACT SIGNATURE: "— Sincerely, Klint. —"
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -380,9 +395,9 @@ export class RomanticBillboard {
     ctx.shadowOffsetY = 3;
 
     // Elegant Calligraphic Serif Italic
-    ctx.font = "italic 700 66px 'Quicksand', Georgia, serif";
+    ctx.font = "italic 700 62px 'Quicksand', Georgia, serif";
     ctx.fillStyle = "#6d1f35";
-    ctx.fillText("Sincerely, Klint.", 1024, 710);
+    ctx.fillText("— Sincerely, Klint. —", 1024, 775);
     ctx.restore();
 
     // 9. Create Three.js Texture

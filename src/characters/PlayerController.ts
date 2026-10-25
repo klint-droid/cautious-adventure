@@ -137,4 +137,14 @@ export class PlayerController {
     // Update animations
     this.animator.update(delta, currentSpeed);
   }
+
+  public replaceRig(newRig: AnimeCharacterRig, scene: THREE.Scene) {
+    scene.remove(this.rig.root);
+    this.rig = newRig;
+    this.animator = new CharacterAnimationController(newRig);
+    this.rig.root.position.copy(this.position);
+    this.rig.root.rotation.y = this.rotationY;
+    scene.add(this.rig.root);
+  }
+
 }

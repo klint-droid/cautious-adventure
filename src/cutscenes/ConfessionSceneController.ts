@@ -273,6 +273,7 @@ export class ConfessionSceneController {
     this.npc.lookAt(this.player.position, true);
     this.player.lookAt(this.npc.position);
     this.npc.setEmotion("blushing");
+    this.npc.setState("CONFESSION");
 
     // Deliver all 4 scripted confession lines one at a time via dialogue system
     dialogueManager.startDialogue("confession_speech_1");

@@ -7,7 +7,7 @@
 import * as THREE from "three";
 import { AnimeCharacterRig } from "./AnimeModelFactory";
 
-export type AnimationState = "idle" | "walk" | "run" | "talk" | "blush" | "wave" | "sit";
+export type AnimationState = "idle" | "walk" | "run" | "talk" | "blush" | "wave" | "sit" | "turn" | "confession";
 
 export class CharacterAnimationController {
   private rig: AnimeCharacterRig;
@@ -17,12 +17,19 @@ export class CharacterAnimationController {
   private isBlinking = false;
   private currentBlushAlpha = 0;
   private targetBlushAlpha = 0;
+  private currentAction: THREE.AnimationAction | null = null;
+  private currentActionName = "";
 
   // Head look-at target (e.g. for looking at player or NPC during conversation)
   public lookAtTarget: THREE.Vector3 | null = null;
 
   constructor(rig: AnimeCharacterRig) {
     this.rig = rig;
+    if (this.rig.gltfActions && this.rig.gltfActions["Idle"]) {
+      this.currentAction = this.rig.gltfActions["Idle"];
+      this.currentActionName = "Idle";
+      this.currentAction.play();
+    }
   }
 
   public setState(newState: AnimationState) {
@@ -41,6 +48,13 @@ export class CharacterAnimationController {
 
   public update(delta: number, movementSpeed = 0) {
     this.animTime += delta;
+
+    // If GLTF mixer is present, drive model animation clips
+    if (this.rig.gltfMixer) {
+      this.updateGLTFAnimation(movementSpeed);
+      this.rig.gltfMixer.update(delta);
+      return;
+    }
 
     // Smooth blush transition
     this.currentBlushAlpha = THREE.MathUtils.lerp(this.currentBlushAlpha, this.targetBlushAlpha, delta * 5);
@@ -253,4 +267,51 @@ export class CharacterAnimationController {
     const breath = Math.sin(this.animTime * 2);
     bones.chest.rotation.x = breath * 0.03;
   }
+
+  private updateGLTFAnimation(movementSpeed: number) {
+    if (!this.rig.gltfActions) return;
+
+    let targetAction = "Idle";
+
+    if (this.state === "confession" && this.rig.gltfActions["Confession"]) {
+      targetAction = "Confession";
+    } else if (this.state === "wave" && this.rig.gltfActions["Wave"]) {
+      targetAction = "Wave";
+    } else if (this.state === "turn" && this.rig.gltfActions["Turn"]) {
+      targetAction = "Turn";
+    } else if (this.state === "talk" && this.rig.gltfActions["Talk"]) {
+      targetAction = "Talk";
+    } else if ((this.state === "walk" || this.state === "run" || movementSpeed > 0.1) && this.rig.gltfActions["Walk"]) {
+      targetAction = "Walk";
+    } else if (this.rig.gltfActions["Idle"]) {
+      targetAction = "Idle";
+    }
+
+    if (targetAction !== this.currentActionName) {
+      const nextAction = this.rig.gltfActions[targetAction];
+      if (nextAction) {
+        const fadeDuration = 0.25;
+        nextAction.reset();
+        if (targetAction === "Walk" && (this.state === "run" || movementSpeed > 4.5)) {
+          nextAction.timeScale = 1.6;
+        } else {
+          nextAction.timeScale = 1.0;
+        }
+        nextAction.fadeIn(fadeDuration).play();
+
+        if (this.currentAction && this.currentAction !== nextAction) {
+          this.currentAction.fadeOut(fadeDuration);
+        }
+        this.currentAction = nextAction;
+        this.currentActionName = targetAction;
+      }
+    } else if (this.currentActionName === "Walk") {
+      if (this.state === "run" || movementSpeed > 4.5) {
+        this.currentAction!.timeScale = 1.6;
+      } else {
+        this.currentAction!.timeScale = 1.0;
+      }
+    }
+  }
+
 }

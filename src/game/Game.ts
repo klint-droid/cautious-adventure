@@ -107,6 +107,9 @@ export class Game {
     this.player = new PlayerController(playerRig);
     this.npc = new NPCController(npcRig);
 
+    // Asynchronously load external GLTF models (Cyril.glb & Klint.glb)
+    this.loadGLTFCharacters(factory);
+
     // 8b. Romantic Billboard overlooking Mirror Lake
     this.romanticBillboard = new RomanticBillboard();
     this.scene.add(this.romanticBillboard.group);
@@ -425,4 +428,27 @@ export class Game {
     // 7. Render Frame
     this.renderer.render(this.scene, this.camera);
   };
+
+  private async loadGLTFCharacters(factory: AnimeModelFactory) {
+    try {
+      const cyrilRig = await factory.loadGLTFCharacter("/assets/Cyril.glb", "female");
+      if (cyrilRig) {
+        this.player.replaceRig(cyrilRig, this.scene);
+        console.info("Successfully loaded Cyril 3D model for player.");
+      }
+    } catch (e) {
+      console.warn("Failed to load Cyril.glb, keeping procedural model:", e);
+    }
+
+    try {
+      const klintRig = await factory.loadGLTFCharacter("/assets/Klint.glb", "male");
+      if (klintRig) {
+        this.npc.replaceRig(klintRig, this.scene);
+        console.info("Successfully loaded Klint 3D model for NPC.");
+      }
+    } catch (e) {
+      console.warn("Failed to load Klint.glb, keeping procedural model:", e);
+    }
+  }
+
 }

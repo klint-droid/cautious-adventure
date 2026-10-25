@@ -10,7 +10,7 @@ import { AnimeCharacterRig } from "./AnimeModelFactory";
 import { CharacterAnimationController } from "./CharacterAnimationController";
 import { relationshipSystem } from "../dialogue/RelationshipSystem";
 
-export type NPCBehaviorState = "IDLE" | "AWARE" | "TALKING" | "WALKING" | "SITTING";
+export type NPCBehaviorState = "IDLE" | "AWARE" | "TALKING" | "WALKING" | "SITTING" | "CONFESSION";
 
 export class NPCController {
   public rig: AnimeCharacterRig;
@@ -51,6 +51,9 @@ export class NPCController {
         break;
       case "SITTING":
         this.animator.setState("sit");
+        break;
+      case "CONFESSION":
+        this.animator.setState("confession");
         break;
     }
   }
@@ -122,4 +125,14 @@ export class NPCController {
     // Update animation kinematic rigs
     this.animator.update(delta, 0);
   }
+
+  public replaceRig(newRig: AnimeCharacterRig, scene: THREE.Scene) {
+    scene.remove(this.rig.root);
+    this.rig = newRig;
+    this.animator = new CharacterAnimationController(newRig);
+    this.rig.root.position.copy(this.position);
+    this.rig.root.rotation.y = this.rotationY;
+    scene.add(this.rig.root);
+  }
+
 }
