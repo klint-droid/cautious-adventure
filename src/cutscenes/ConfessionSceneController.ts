@@ -148,9 +148,22 @@ export class ConfessionSceneController {
     // Lock player input
     this.player.setMovementLocked(true);
 
+    // Bring characters closer to a natural intimate conversational distance (~1.4m apart)
+    const toPlayer = this.player.position.clone().sub(this.npc.position);
+    toPlayer.y = 0;
+    if (toPlayer.length() > 1.5 || toPlayer.length() < 0.8) {
+      if (toPlayer.lengthSq() < 0.001) toPlayer.set(0, 0, 1.4);
+      else toPlayer.normalize().multiplyScalar(1.4);
+      this.player.setPosition(
+        this.npc.position.x + toPlayer.x,
+        0,
+        this.npc.position.z + toPlayer.z
+      );
+    }
+
     // Orient characters toward each other
     this.player.lookAt(this.npc.position);
-    this.npc.lookAt(this.player.position);
+    this.npc.lookAt(this.player.position, true);
 
     // Frame them in side-by-side Genshin-style cinematic camera
     this.cameraController.setCinematicMode(true, this.player.position, this.npc.position);
@@ -245,9 +258,9 @@ export class ConfessionSceneController {
     this.state = "BILLBOARD_REVEAL";
     this.stageTimer = 0;
 
-    // Settle character positions at scenic overlook
-    this.npc.setPosition(20.0, 0, -4.8);
-    this.player.setPosition(18.4, 0, -5.0);
+    // Settle character positions at scenic overlook intimately close (1.2m apart)
+    this.npc.setPosition(19.8, 0, -4.8);
+    this.player.setPosition(18.6, 0, -4.9);
 
     this.npc.setState("IDLE");
     this.player.animator.setState("idle");
@@ -258,8 +271,8 @@ export class ConfessionSceneController {
     this.player.lookAt(billboardLookAt);
 
     // Cinematic Camera Framing: Cyril (left), Klint (center-left), Billboard (prominently centered in lake overlook)
-    const revealCamPos = new THREE.Vector3(15.2, 1.85, -2.4);
-    const revealLookAt = new THREE.Vector3(21.2, 2.0, -9.0);
+    const revealCamPos = new THREE.Vector3(15.5, 1.8, -2.5);
+    const revealLookAt = new THREE.Vector3(21.2, 1.95, -8.6);
     this.cameraController.setCustomCinematic(revealCamPos, revealLookAt);
 
     // Smooth Billboard Reveal (fade-in & lighting)

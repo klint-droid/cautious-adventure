@@ -283,7 +283,7 @@ export class Game {
         this.pauseMenu.hide();
       },
       onReset: () => {
-        this.player.setPosition(0, 0, 7.5);
+        this.player.setPosition(0, 0, 5.0);
         this.player.rotationY = Math.PI;
         this.npc.setPosition(0, 0, 3.2);
         this.hud.updateStats();

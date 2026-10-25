@@ -42,9 +42,9 @@ export class CameraController {
       const side = new THREE.Vector3(-toNpc.z, 0, toNpc.x).normalize();
 
       // Position camera so Cyril and Klint are framed cleanly in the left & center
-      // leaving the right side clear for Genshin choice buttons
-      this.cinematicCamPos.copy(mid).add(side.multiplyScalar(2.6)).add(new THREE.Vector3(0, 0.25, 0));
-      this.cinematicLookAt.copy(mid).add(side.multiplyScalar(-0.45));
+      // with intimate, close-up framing
+      this.cinematicCamPos.copy(mid).add(side.multiplyScalar(2.0)).add(new THREE.Vector3(0, 0.15, 0));
+      this.cinematicLookAt.copy(mid).add(side.multiplyScalar(-0.25));
     }
   }
 

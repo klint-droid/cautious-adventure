@@ -16,7 +16,7 @@ import { soundManager } from "../audio/SoundManager";
 export class PlayerController {
   public rig: AnimeCharacterRig;
   public animator: CharacterAnimationController;
-  public position: THREE.Vector3 = new THREE.Vector3(0, 0, 7.5); // Starts in Central Plaza
+  public position: THREE.Vector3 = new THREE.Vector3(0, 0, 5.0); // Starts in Central Plaza near Klint
   public rotationY = Math.PI;
 
   private velocity = new THREE.Vector3();
