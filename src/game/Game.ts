@@ -27,6 +27,7 @@ import { notificationSystem } from "../ui/NotificationSystem";
 
 // Cutscenes
 import { RomanticBillboard } from "../cutscenes/RomanticBillboard";
+import { BannerPlane } from "../cutscenes/BannerPlane";
 import { ConfessionSceneController } from "../cutscenes/ConfessionSceneController";
 
 export class Game {
@@ -52,6 +53,7 @@ export class Game {
 
   // Cutscenes
   private romanticBillboard: RomanticBillboard;
+  private bannerPlane: BannerPlane;
   private confessionSceneController: ConfessionSceneController;
 
   private isRunning = false;
@@ -114,12 +116,17 @@ export class Game {
     this.romanticBillboard = new RomanticBillboard();
     this.scene.add(this.romanticBillboard.group);
 
-    // 8c. Confession Scene Controller State Machine
+    // 8c. Skywriting Banner Airplane above Mirror Lake
+    this.bannerPlane = new BannerPlane();
+    this.scene.add(this.bannerPlane.group);
+
+    // 8d. Confession Scene Controller State Machine
     this.confessionSceneController = new ConfessionSceneController(
       this.player,
       this.npc,
       this.cameraController,
-      this.romanticBillboard
+      this.romanticBillboard,
+      this.bannerPlane
     );
 
     // Glowing Golden Diamond Waypoint above Klint's head

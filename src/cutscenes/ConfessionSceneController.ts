@@ -12,6 +12,7 @@ import { PlayerController } from "../characters/PlayerController";
 import { NPCController } from "../characters/NPCController";
 import { CameraController } from "../game/CameraController";
 import { RomanticBillboard } from "./RomanticBillboard";
+import { BannerPlane } from "./BannerPlane";
 import { dialogueManager } from "../dialogue/DialogueManager";
 import { soundManager } from "../audio/SoundManager";
 import { notificationSystem } from "../ui/NotificationSystem";
@@ -32,6 +33,7 @@ export class ConfessionSceneController {
   private npc: NPCController;
   private cameraController: CameraController;
   private billboard: RomanticBillboard;
+  private bannerPlane: BannerPlane;
 
   // DOM Overlay Elements
   private fadeOverlay: HTMLElement;
@@ -52,12 +54,14 @@ export class ConfessionSceneController {
     player: PlayerController,
     npc: NPCController,
     cameraController: CameraController,
-    billboard: RomanticBillboard
+    billboard: RomanticBillboard,
+    bannerPlane: BannerPlane
   ) {
     this.player = player;
     this.npc = npc;
     this.cameraController = cameraController;
     this.billboard = billboard;
+    this.bannerPlane = bannerPlane;
 
     // Create Walking Path Curve: Central Plaza (0, 0, 3.2) -> Mirror Lake Shore (20.0, 0, -4.8)
     this.walkCurve = new THREE.CatmullRomCurve3([
@@ -260,6 +264,9 @@ export class ConfessionSceneController {
 
     // Smooth Billboard Reveal (fade-in & lighting)
     this.billboard.reveal(2.2);
+
+    // Launch Airplane trailing romantic banner across the sunset sky!
+    this.bannerPlane.start();
   }
 
   /**
@@ -326,6 +333,9 @@ export class ConfessionSceneController {
   public update(delta: number) {
     // 1. Update Billboard animation & particles
     this.billboard.update(delta);
+
+    // 1b. Update Banner Plane flight & fluttering cloth banner
+    this.bannerPlane.update(delta);
 
     // 2. State Machine Logic
     switch (this.state) {
