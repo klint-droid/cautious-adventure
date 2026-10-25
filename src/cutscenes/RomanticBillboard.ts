@@ -31,7 +31,7 @@ export class RomanticBillboard {
   private petalGeo: THREE.BufferGeometry;
   private petalMat: THREE.PointsMaterial;
 
-  constructor(position: THREE.Vector3 = new THREE.Vector3(22.0, 2.3, -11.5), rotationY: number = -0.45) {
+  constructor(position: THREE.Vector3 = new THREE.Vector3(24.2, 2.5, -11.8), rotationY: number = -0.65) {
     this.group = new THREE.Group();
     this.group.position.copy(position);
     this.group.rotation.y = rotationY;
@@ -331,16 +331,16 @@ export class RomanticBillboard {
     ctx.shadowOffsetY = 4;
 
     // Font setup: Bold, crisp, romantic anime typography
-    ctx.font = "900 94px 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.font = "900 86px 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
     // Outline stroke for readability
     ctx.strokeStyle = "#ffd54f"; // Warm gold rim
     ctx.lineWidth = 8;
-    ctx.strokeText("CYRIL, CAN I COURT YOU?", 1024, 430);
+    ctx.strokeText("CYRIL, ARE YOU OPEN FOR COURTS?", 1024, 430);
 
     // Main Fill: Deep romantic wine/plum
     ctx.fillStyle = "#3b1120";
-    ctx.fillText("CYRIL, CAN I COURT YOU?", 1024, 430);
+    ctx.fillText("CYRIL, ARE YOU OPEN FOR COURTS?", 1024, 430);
     ctx.restore();
 
     // 7. Romantic Decorative Floral Divider

@@ -73,11 +73,15 @@ export class NPCController {
     return dist <= this.interactionRadius;
   }
 
-  public lookAt(target: THREE.Vector3) {
+  public lookAt(target: THREE.Vector3, immediate: boolean = true) {
     const dir = target.clone().sub(this.position);
     dir.y = 0;
     if (dir.lengthSq() > 0.001) {
       this.targetRotationY = Math.atan2(dir.x, dir.z);
+      if (immediate) {
+        this.rotationY = this.targetRotationY;
+        this.rig.root.rotation.y = this.rotationY;
+      }
     }
   }
 

@@ -191,22 +191,24 @@ export class ConfessionSceneController {
 
     // Klint's position along the CatmullRom spline
     const klintPos = this.walkCurve.getPointAt(progress);
-    // Klint's forward look-at along the curve
-    const lookAheadProgress = Math.min(1.0, progress + 0.04);
-    const klintLookTarget = this.walkCurve.getPointAt(lookAheadProgress);
+    // Smooth tangent vector along the curve for exact forward facing
+    const klintTangent = this.walkCurve.getTangentAt(progress).normalize();
+    const klintHeading = Math.atan2(klintTangent.x, klintTangent.z);
 
     this.npc.setPosition(klintPos.x, 0, klintPos.z);
-    this.npc.lookAt(klintLookTarget);
+    this.npc.rotationY = klintHeading;
+    this.npc.rig.root.rotation.y = klintHeading;
     this.npc.animator.update(delta, 1.8);
 
     // Cyril follows Klint along the path at a natural trailing distance (~1.8m)
     const cyrilProgress = Math.max(0, progress - 0.09);
     const cyrilPos = this.walkCurve.getPointAt(cyrilProgress);
-    const cyrilLookAhead = Math.min(1.0, cyrilProgress + 0.04);
-    const cyrilLookTarget = this.walkCurve.getPointAt(cyrilLookAhead);
+    const cyrilTangent = this.walkCurve.getTangentAt(cyrilProgress).normalize();
+    const cyrilHeading = Math.atan2(cyrilTangent.x, cyrilTangent.z);
 
     this.player.setPosition(cyrilPos.x, 0, cyrilPos.z);
-    this.player.lookAt(cyrilLookTarget);
+    this.player.rotationY = cyrilHeading;
+    this.player.rig.root.rotation.y = cyrilHeading;
     this.player.animator.update(delta, 1.8);
 
     // Rhythmic footstep sound effects
@@ -218,8 +220,7 @@ export class ConfessionSceneController {
 
     // Camera smoothly dollies alongside them in a cinematic tracking shot
     const midPoint = klintPos.clone().add(cyrilPos).multiplyScalar(0.5);
-    const tangent = this.walkCurve.getTangentAt(progress).normalize();
-    const sideVector = new THREE.Vector3(-tangent.z, 0, tangent.x).normalize();
+    const sideVector = new THREE.Vector3(-klintTangent.z, 0, klintTangent.x).normalize();
 
     // Position camera slightly to the side and elevated, looking at the couple
     const camTargetPos = midPoint.clone().add(sideVector.clone().multiplyScalar(4.2)).add(new THREE.Vector3(0, 2.1, 0));
@@ -248,13 +249,13 @@ export class ConfessionSceneController {
     this.player.animator.setState("idle");
 
     // Both look out across Mirror Lake towards the romantic billboard
-    const lakeLookAt = new THREE.Vector3(22.0, 1.6, -11.5);
-    this.npc.lookAt(lakeLookAt);
-    this.player.lookAt(lakeLookAt);
+    const billboardLookAt = new THREE.Vector3(24.2, 1.8, -11.8);
+    this.npc.lookAt(billboardLookAt, true);
+    this.player.lookAt(billboardLookAt);
 
     // Cinematic Camera Framing: Cyril (left), Klint (center-left), Billboard (prominently centered in lake overlook)
     const revealCamPos = new THREE.Vector3(15.2, 1.85, -2.4);
-    const revealLookAt = new THREE.Vector3(20.5, 2.1, -9.8);
+    const revealLookAt = new THREE.Vector3(21.2, 2.0, -9.0);
     this.cameraController.setCustomCinematic(revealCamPos, revealLookAt);
 
     // Smooth Billboard Reveal (fade-in & lighting)
@@ -263,13 +264,14 @@ export class ConfessionSceneController {
 
   /**
    * STAGE FOUR: Klint's Confession
-   * After billboard is revealed, Klint turns toward Cyril and delivers his 4 scripted lines.
+   * After billboard is revealed, Klint turns directly to face Cyril and delivers his 4 scripted lines.
    */
   private startConfessionSpeech() {
     this.state = "CONFESSION";
 
-    // Klint turns with gentle blush to Cyril
-    this.npc.lookAt(this.player.position);
+    // Both characters turn to look warmly into each other's eyes
+    this.npc.lookAt(this.player.position, true);
+    this.player.lookAt(this.npc.position);
     this.npc.setEmotion("blushing");
 
     // Deliver all 4 scripted confession lines one at a time via dialogue system
@@ -339,7 +341,9 @@ export class ConfessionSceneController {
         break;
 
       case "CONFESSION":
-        // Keep characters gently animated in idle/blushing state
+        // Keep characters looking warmly at each other in face-to-face orientation
+        this.npc.lookAt(this.player.position, true);
+        this.player.lookAt(this.npc.position);
         this.npc.animator.update(delta, 0);
         this.player.animator.update(delta, 0);
         break;
